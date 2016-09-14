@@ -21,12 +21,20 @@ void consume_char(FILE* fp) {
     getc(fp);
 }
 
-void scan_word(FILE *input, int c) {
+void pass_word(FILE *fp) {
+    char c;
+    while((c = getc(fp)) != EOF && c != '\n');
+    if (c == '\n'){
+        line++;
+    }
+}
+
+void scan_word(FILE *input, int c, int indicator) {
     lex_list[lex_index].value = malloc(MAX_WORD_SIZE);
     int i = 0;
     lex_list[lex_index].value[i++] = c;
 
-    if (isdigit(c)) {
+    if (indicator == 0 && isdigit(c)) {
         while (isdigit(c = getc(input))) {
             lex_list[lex_index].value[i++] = c;
         }
@@ -36,11 +44,41 @@ void scan_word(FILE *input, int c) {
         ungetc(c, input);
         lex_list[lex_index].token = NUMBER;
     } else {
-        while(isalnum(c = getc(input)) || (c == '_')) {
-            lex_list[lex_index].value[i++] = c;
+        if (indicator == 1) {
+            while((c = getc(input)) != EOF && c != '"') {
+                if (c == '\n')
+                    line++;
+                lex_list[lex_index].value[i++] = c;
+            }
+            if (c == EOF) {
+                ERRORF(line, unmatched double quote);
+            }
+        } else if (indicator == 0) {
+            while(isalnum(c = getc(input)) || (c == '_')) {
+                lex_list[lex_index].value[i++] = c;
+            }
+        } else if (indicator == 2) {
+            if ((c = getc(input)) != '\'') {
+                //printf("c = %d\n", c);
+                ERRORF(line, unmatched single quote);
+            }
         }
         ungetc(c, input);
-        lex_list[lex_index].token = IDENTIFIER;
+
+        char *value = lex_list[lex_index].value;
+        if(strcmp(value, "if") == 0) {
+            lex_list[lex_index].token = IF;
+        } else if (strcmp(value, "else") == 0) {
+            lex_list[lex_index].token = ELSE;
+        } else if (strcmp(value, "while") == 0) {
+            lex_list[lex_index].token = WHILE;
+        } else if (strcmp(value, "define") == 0) {
+            lex_list[lex_index].token = DEFINE;
+        } else if (strcmp(value, "return") == 0) {
+            lex_list[lex_index].token = RETURN;
+        } else {
+            lex_list[lex_index].token = IDENTIFIER;
+        }
     }
     lex_list[lex_index].value[i] = '\0';
     lex_list[lex_index++].line = line;
@@ -49,21 +87,22 @@ void scan_word(FILE *input, int c) {
 void lexer(FILE *input) {
     //int c = getc(input);
     int c = ' ';
+
+    /* if pair == 0, there's no pair;
+     * if pair == 1, this is a string pair;
+     * if pair == 2, this is a character pair;
+     */
+    int pair = 0;
     while (c != EOF) {
         c = getc(input);
-        if (isspace(c)) {
-            continue;
-        }
         if (c == '\n') {
             printf("1\n");
             line++;
-            continue;
         }
         if (c == EOF) {
             printf("2\n");
             break;
         }
-
         if (c == ';') {
             printf("3\n");
             ASSIGN_LEX_LIST(";", SEMICOLON, line);
@@ -119,6 +158,24 @@ void lexer(FILE *input) {
             }
             continue;
         }
+        if (c == '>') {
+            if(peek(input) == '=') {
+                consume_char(input);
+                ASSIGN_LEX_LIST(">=", GTE, line);
+            } else {
+                ASSIGN_LEX_LIST(">", GT, line);
+            }
+            continue;
+        }
+        if (c == '<') {
+            if (peek(input) == '=') {
+                consume_char(input);
+                ASSIGN_LEX_LIST("<=", LTE, line);
+            } else {
+                ASSIGN_LEX_LIST("<", LT, line);
+            }
+            continue;
+        }
         if (c == '+') {
             printf("13\n");
             ASSIGN_LEX_LIST("+", ADD, line);
@@ -141,17 +198,33 @@ void lexer(FILE *input) {
         }
         if (c == '"') {
             printf("17\n");
+            if (pair == 1 || pair == 0)
+                pair = 1 - pair;
             ASSIGN_LEX_LIST("\"", DOUBLEQUOTE, line);
             continue;
         }
         if (c == '\'') {
             printf("18\n");
+            if (pair == 2 || pair == 0)
+                pair = 2 - pair;
             ASSIGN_LEX_LIST("'", SINGLEQUOTE, line);
             continue;
         }
-        if (isalnum(c) || c == '_'){
+        if (pair != 0) {
             printf("19\n");
-            scan_word(input, c);
+            scan_word(input, c, pair);
+            continue;
+        }
+        if (c == '#') {
+            pass_word(input);
+            continue;
+        }
+        if (isalnum(c) || c == '_'){
+            printf("20\n");
+            scan_word(input, c, 0);
+            continue;
+        }
+        if (isspace(c)) {
             continue;
         }
         ERRORF(123, unknown character);
