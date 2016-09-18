@@ -96,122 +96,127 @@ void lexer(FILE *input) {
     while (c != EOF) {
         c = getc(input);
         if (c == '\n') {
-            printf("1\n");
+            LOG("%s\n", "'\\n' scanned");
             line++;
         }
         if (c == EOF) {
-            printf("2\n");
+            LOG("%s\n", "'EOF' scanned");
             break;
         }
         if (c == ';') {
-            printf("3\n");
+            LOG("%s\n", "';' scanned");
             ASSIGN_LEX_LIST(";", SEMICOLON, line);
             continue;
         }
         if (c == ':') {
+            LOG("%s\n", "':' scanned");
             printf("4\n");
             ASSIGN_LEX_LIST(":", COLON, line);
             continue;
         }
         if (c == ',') {
-            printf("5\n");
+            LOG("%s\n", "',' scanned");
             ASSIGN_LEX_LIST(",", COMMA, line);
             continue;
         }
         if (c == '(') {
-            printf("6\n");
+            LOG("%s\n", "'(' scanned");
             ASSIGN_LEX_LIST("(", LPARAN, line);
             continue;
         }
         if (c == ')') {
-            printf("7\n");
+            LOG("%s\n", "')' scanned");
             ASSIGN_LEX_LIST(")", RPARAN, line);
             continue;
         }
         if (c == '[') {
-            printf("8\n");
+            LOG("%s\n", "'[' scanned");
             ASSIGN_LEX_LIST("[", LBRACK, line);
             continue;
         }
         if (c == ']') {
-            printf("9\n");
+            LOG("%s\n", "']' scanned");
             ASSIGN_LEX_LIST("]", RBRACK, line);
             continue;
         }
         if (c == '{') {
-            printf("10\n");
+            LOG("%s\n", "'{' scanned");
             ASSIGN_LEX_LIST("{", LBRACE, line);
             continue;
         }
         if (c == '}') {
-            printf("11\n");
+            LOG("%s\n", "'}' scanned");
             ASSIGN_LEX_LIST("}", RBRACE, line);
             continue;
         }
         if (c == '=') {
-            printf("12\n");
             if (peek(input) == '=') {
+                LOG("%s\n", "'==' scanned");
                 consume_char(input);
                 ASSIGN_LEX_LIST("==", EQUAL, line);
             } else {
+                LOG("%s\n", "'=' scanned");
                 ASSIGN_LEX_LIST("=", ASSIGN, line);
             }
             continue;
         }
         if (c == '>') {
             if(peek(input) == '=') {
+                LOG("%s\n", "'>=' scanned");
                 consume_char(input);
                 ASSIGN_LEX_LIST(">=", GTE, line);
             } else {
+                LOG("%s\n", "'>' scanned");
                 ASSIGN_LEX_LIST(">", GT, line);
             }
             continue;
         }
         if (c == '<') {
             if (peek(input) == '=') {
+                LOG("%s\n", "'<=' scanned");
                 consume_char(input);
                 ASSIGN_LEX_LIST("<=", LTE, line);
             } else {
+                LOG("%s\n", "'<' scanned");
                 ASSIGN_LEX_LIST("<", LT, line);
             }
             continue;
         }
         if (c == '+') {
-            printf("13\n");
+            LOG("%s\n", "'+' scanned");
             ASSIGN_LEX_LIST("+", ADD, line);
             continue;
         }
         if (c == '-') {
-            printf("14\n");
+            LOG("%s\n", "'-' scanned");
             ASSIGN_LEX_LIST("-", MINUS, line);
             continue;
         }
         if (c == '*') {
-            printf("15\n");
+            LOG("%s\n", "'*' scanned");
             ASSIGN_LEX_LIST("*", MUL, line);
             continue;
         }
         if (c == '/') {
-            printf("16\n");
+            LOG("%s\n", "'/' scanned");
             ASSIGN_LEX_LIST("/", DIV, line);
             continue;
         }
         if (c == '"') {
-            printf("17\n");
+            LOG("%s\n", "'\"' scanned");
             if (pair == 1 || pair == 0)
                 pair = 1 - pair;
             ASSIGN_LEX_LIST("\"", DOUBLEQUOTE, line);
             continue;
         }
         if (c == '\'') {
-            printf("18\n");
+            LOG("%s\n", "\"'\" scanned");
             if (pair == 2 || pair == 0)
                 pair = 2 - pair;
             ASSIGN_LEX_LIST("'", SINGLEQUOTE, line);
             continue;
         }
         if (pair != 0) {
-            printf("19\n");
             scan_word(input, c, pair);
             continue;
         }
@@ -220,7 +225,6 @@ void lexer(FILE *input) {
             continue;
         }
         if (isalnum(c) || c == '_'){
-            printf("20\n");
             scan_word(input, c, 0);
             continue;
         }
@@ -234,10 +238,10 @@ void lexer(FILE *input) {
 
 void print_lexer_result() {
     for (int i = 0; i < lex_index; i++) {
-        printf("===== %d =====\n", i);
-        printf("%s\n", lex_list[i].value);
-        printf("%d\n", lex_list[i].token);
-        printf("%d\n", lex_list[i].line);
-        printf("\n");
+        LOG("===== %d =====\n", i);
+        LOG("%s\n", lex_list[i].value);
+        LOG("%d\n", lex_list[i].token);
+        LOG("%d\n", lex_list[i].line);
+        LOG("%s\n", "\n");
     }
 }

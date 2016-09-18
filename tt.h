@@ -13,6 +13,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEBUG
+
+#ifdef DEBUG
+    #define LOG(format, ...) \
+        fprintf(stdout, format, __VA_ARGS__)
+#else
+    #define LOG(format, ...) \
+        0
+#endif
+
 typedef struct __lex lex;
 typedef enum __token TOKEN;
 
@@ -116,6 +126,11 @@ typedef struct _character_ast_s {
     char value;
 } character_ast_t;
 
+#define new_character_ast(x, v) \
+    x = (character_ast_t*)malloc(sizeof(character_ast_t)); \
+    x->type = CHARACTERAST; \
+    x->value = v
+
 typedef struct _string_ast_s {
     ast_object;
     char *value;
@@ -158,6 +173,7 @@ struct _function_ast_s {
 
 #define PRINTF_ENUM(e) \
     printf("[print] ENUM %d"#e"\n", e)
+
 
 extern lex lex_list[MAX_STRING];
 extern int lex_index;

@@ -11,7 +11,7 @@ static int parse_index = 0;
 static lex *curtok;
 
 ast_t *parse_expression();
-void print_ast(ast_t *);
+void print_ast(ast_t *, int);
 
 static int get_precedence(lex *current) {
     if (!current)
@@ -43,7 +43,7 @@ static void unget_token() {
 
 ast_t *parse_identifier() {
     lex *current = curtok; 
-    get_next_token(); // skip identifier
+    //get_next_token(); // skip identifier
     lex *next = curtok;
     if (next->token == LPARAN) {
         // function call;
@@ -84,27 +84,27 @@ ast_t *parse_paran() {
     if (curtok->token != RPARAN) {
         ERRORF(curtok->line, expected right parenthesis here);
     }
-    get_next_token(); // consume )
+    //get_next_token(); // consume )
     return inside;
 }
 
 ast_t *parse_primary() {
-    ast_t *res;
     if (!curtok) {
         return NULL;
     }
+    ast_t *res;
     switch(curtok->token) {
         case IDENTIFIER:
             res = parse_identifier();
-            get_next_token();
+            get_next_token(); // skip identifier;
             return res;
         case NUMBER:
             res = parse_number();
-            get_next_token();
+            get_next_token(); // skip number;
             return res;
         case LPARAN:
             res = parse_paran();
-            get_next_token();
+            get_next_token(); // skip right paran )
             return res;
         default:
             ERRORF(curtok->line, unexpected token);
@@ -123,8 +123,6 @@ ast_t *parse_binary_ops(int precedence, ast_t *lhs) {
 
         ast_t *rhs = parse_primary();
         if (!rhs) {
-            // should parse error
-            // ERRORF(-1, parse error);
             return lhs;
         }
 
@@ -151,34 +149,52 @@ ast_t *parse_expression() {
         return NULL;
     }
     ast_t *res = parse_binary_ops(0, lhs);
-    print_ast(res);
     return res;
 }
 
-void print_ast(ast_t *t) {
+void pretty_format(int depth) {
+    return;
+    for(int i = 0; i < depth; i++) {
+        printf(" ");
+    }
+}
+
+void print_ast(ast_t *t, int depth) {
     if (!t) {
         printf("ast is NULL;\n");
         return;
     }
 
     //PRINTF_ENUM(t->type);
-    
     switch (t->type) {
         case NUMBERAST:
+            pretty_format(depth);
             printf("%ld ", ((number_ast_t*)t)->value);
             break;
         case STRINGAST:
+            pretty_format(depth);
             printf("%s ", ((string_ast_t*)t)->value);
             break;
         case BINARYAST:
             //binary_ast_t *temp = (binary_ast_t*)t;
+            pretty_format(depth);
             printf("(");
-            print_ast(((binary_ast_t*)t)->op);
-            print_ast(((binary_ast_t*)t)->lhs);
-            print_ast(((binary_ast_t*)t)->rhs);
-            printf(")");
+            print_ast(((binary_ast_t*)t)->op, depth+1);
+            print_ast(((binary_ast_t*)t)->lhs, depth+1);
+            print_ast(((binary_ast_t*)t)->rhs, depth+1);
+            pretty_format(depth);
+            printf(") ");
+            break;
+        case VARIABLEAST:
+            pretty_format(depth);
+            printf("%s ", ((variable_ast_t*)t)->value);
+            break;
+        case CHARACTERAST:
+            pretty_format(depth);
+            printf("%c ", ((character_ast_t*)t)->value);
             break;
         default:
+            printf("ast type is %d\n", t->type);
             ERRORF(-1, no such ast type);
     }
 }
@@ -190,7 +206,14 @@ ast_t *parser() {
         ast = parse_expression();
         if (!ast) 
             break;
-        print_ast(ast);
+
+        lex *current = curtok;
+        // handle the end of expression
+        if (current && current->token == SEMICOLON) {
+            get_next_token();
+        }
+        print_ast(ast, 0);
+        printf("\n");
     }
     return NULL;
 }
