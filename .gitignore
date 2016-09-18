@@ -4,3 +4,4 @@ a.out
 *.tt
 .gdb_history
 test*.c
+peda*
