@@ -30,33 +30,37 @@ typedef enum __token TOKEN;
 
 enum __token {
     SEMICOLON = 1, // ;
+    EXCLAM, // !
+    NEQ, // !=
     COLON, // :
-    COMMA, // ,
+    COMMA, // , // 5
     LPARAN, // (
-    RPARAN, // ) 5
+    RPARAN, // ) 
     LBRACK, // [
     RBRACK, // ]
-    LBRACE, // {
+    LBRACE, // { 10
     RBRACE, // }
-    EQUAL, // == 10
+    EQUAL, // == 
     ASSIGN, // =
     GT, // >
-    LT, // <
+    LT, // < 15
     GTE, // >=
-    LTE, // <= 15
+    LTE, // <= 
     ADD, // +
     MINUS, // -
-    MUL, // *
+    MUL, // * 20
     DIV, // / 
-    DOUBLEQUOTE, // " 20
+    DOUBLEQUOTE, // " 22
     SINGLEQUOTE, // '
     NUMBER, // 0-9
-    IDENTIFIER,
+    IDENTIFIER, // 25
     IF, // if 
-    ELSE, // else 25
+    ELSE, // else 27
     WHILE, // while
     DEFINE, // define
-    RETURN, // return
+    RETURN, // return 30
+    TRUE, // true
+    FALSE, // false
 };
 
 struct __lex {
@@ -76,26 +80,51 @@ enum __ast_type {
     IDENTIFIERAST,
     CALLAST,
     FUNCTIONAST,
+    IFAST,
+    WHILEAST,
+    BOOLEANAST,
+};
+
+typedef struct environment_s environment;
+typedef struct env_node_s env_node;
+typedef struct ast_s ast_t;
+typedef hlist_t expressions;
+typedef struct expression_s expression;
+
+// environment
+struct environment_s {
+    hlist_t hlist;
+    struct environment_s *prev;
+};
+
+struct env_node_s {
+    ast_t *variable;
+    ast_t *value;
+    hlist_node_t node;
+};
+
+// expression
+struct expression_s {
+    ast_t *ast;
+    hlist_node_t node;
 };
 
 #define ast_object \
-    ast_type type
+    ast_type type; \
+    int line
 
-typedef struct env_s {
-
-} env_t;
-
-typedef struct ast_s {
+struct ast_s {
     ast_object;
-} ast_t;
+};
 
 typedef struct _number_ast_s {
     ast_object;
     long value;
 } number_ast_t;
 
-#define new_number_ast(x, v) \
+#define new_number_ast(x, v, no) \
     x = malloc(sizeof(number_ast_t)); \
+    x->line = no; \
     x->type = NUMBERAST; \
     x->value = v
 
@@ -104,8 +133,9 @@ typedef struct _variable_ast_s {
     char *value;
 } variable_ast_t;
 
-#define new_variable_ast(x, v) \
+#define new_variable_ast(x, v, no) \
     x = (variable_ast_t*)malloc(sizeof(variable_ast_t)); \
+    x->line = no; \
     x->type = VARIABLEAST; \
     x->value = v
 
@@ -116,13 +146,24 @@ typedef struct _binary_ast_s {
     ast_t *rhs;
 } binary_ast_t;
 
-#define new_binary_ast(x, o, l, r) \
+#define new_binary_ast(x, o, l, r, no) \
     x = (binary_ast_t*)malloc(sizeof(binary_ast_t)); \
     x->type = BINARYAST; \
+    x->line = no; \
     x->op = o; \
     x->lhs = l; \
     x->rhs = r
 
+typedef struct _boolean_ast_s {
+    ast_object;
+    char value;
+}boolean_ast_t;
+
+#define new_boolean_ast(x, v, no) \
+    x = (boolean_ast_t *) malloc(sizeof(boolean_ast_t)); \
+    x->type = BOOLEANAST; \
+    x->line = no; \
+    x->value = v
 
 typedef struct _character_ast_s {
     ast_object;
@@ -131,6 +172,7 @@ typedef struct _character_ast_s {
 
 #define new_character_ast(x, v) \
     x = (character_ast_t*)malloc(sizeof(character_ast_t)); \
+    x->line = -1; \
     x->type = CHARACTERAST; \
     x->value = v
 
@@ -139,8 +181,9 @@ typedef struct _string_ast_s {
     char *value;
 } string_ast_t;
 
-#define new_string_ast(x, v) \
+#define new_string_ast(x, v, no) \
     x = (string_ast_t*)malloc(sizeof(string_ast_t)); \
+    x->line = no; \
     x->type = STRINGAST; \
     x->value = v
 
@@ -151,17 +194,56 @@ typedef struct _identifier_ast_s {
 
 typedef struct _call_ast_s {
     ast_object;
-    ast_t **args;
+    char *name;
+    expressions *args;
 } call_ast_t;
 
-#define new_call_ast(x) x = (call_ast_t *)malloc(sizeof(call_ast_t))
+#define new_call_ast(x, no) \
+    x = (call_ast_t *)malloc(sizeof(call_ast_t)); \
+    x->type = CALLAST; \
+    x->line = no
 
-struct _function_ast_s {
+typedef struct _function_ast_s {
     ast_object;
-    ast_t **params;
-    ast_t **body;
-    env_t **env;
+    char *name;
+    expressions *params;
+    expressions *body;
+    environment *env;
 } function_ast_t;
+
+#define new_function_ast(x, nam, no) \
+    x = (function_ast_t*)malloc(sizeof(function_ast_t)); \
+    x->type = FUNCTIONAST;\
+    x->line = no; \
+    x->name = nam
+
+typedef struct _while_ast {
+    ast_object;
+    ast_t *condition;
+    expressions *body;
+} while_ast;
+
+#define new_while_ast(x, cond, no) \
+    x = (while_ast*)malloc(sizeof(while_ast)); \
+    x->type = WHILEAST; \
+    x->line = no; \
+    x->condition = cond
+
+typedef struct _if_ast {
+    ast_object;
+    ast_t *condition;
+    expressions *then;
+    expressions *els;
+} if_ast;
+
+#define new_if_ast(x, cond, no) \
+    x = (if_ast*)malloc(sizeof(if_ast)); \
+    x->type = IFAST; \
+    x->line = no; \
+    x->condition = cond
+
+#define IS(ast, t) \
+    (ast->type == t)
 
 #define MAX_WORD_SIZE 40
 #define MAX_STRING 10000
@@ -178,37 +260,51 @@ struct _function_ast_s {
     printf("[print] ENUM %d"#e"\n", e)
 
 // for environment
-typedef struct environment_s environment;
-typedef struct env_node_s env_node;
-
-struct environment_s {
-    hlist_t hlist;
-    struct environment_s *prev;
-};
-
-struct env_node_s {
-    ast_t *variable;
-    ast_t *value;
-    hlist_node_t node;
-};
-
 environment *init_env();
 void print_env(environment*);
 void define_variable(ast_t *, ast_t *, environment *);
 environment *extend_environment(environment*);
 ast_t *lookup_variable(ast_t *, environment *);
 int set_variable_value(ast_t *, ast_t *, environment*);
+// end for environment
 
-
+// for lexer
 extern lex lex_list[MAX_STRING];
 extern int lex_index;
 
-// lexer.c
 void lexer(FILE *);
 void print_lexer_result();
+// end for lexer
 
-// parser.c
-ast_t *parser();
+// for parser
+expressions *parser();
 void print_ast(ast_t *, int);
+// end for parser
+
+
+// for expression
+void init_expressions(expressions *);
+void add_after_expression(expression *, expression *);
+
+// for eval
+ast_t *eval(ast_t *, environment *);
+ast_t *eval_expressions(expressions *, environment *);
+int is_variable(ast_t *);
+
+// for binary_eval
+ast_t *eval_equal(binary_ast_t*, environment *);
+ast_t *eval_notequal(binary_ast_t*, environment *);
+ast_t *eval_assignment(binary_ast_t*, environment *);
+ast_t *eval_greater(binary_ast_t*, environment *);
+ast_t *eval_ge(binary_ast_t*, environment *);
+ast_t *eval_less(binary_ast_t*, environment *);
+ast_t *eval_le(binary_ast_t*, environment *);
+ast_t *eval_add(binary_ast_t*, environment *);
+ast_t *eval_sub(binary_ast_t*, environment *);
+ast_t *eval_mul(binary_ast_t*, environment *);
+ast_t *eval_div(binary_ast_t*, environment *);
+
+// for apply
+ast_t *apply(ast_t *function, environment*);
 
 #endif /* !TT_H */

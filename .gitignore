@@ -6,4 +6,4 @@ a.out
 test*.c
 peda*
 tt
-
+core

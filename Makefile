@@ -5,14 +5,14 @@
 #
 TARGET=tt
 CC=gcc
-CFLAGS=-I .
+CFLAGS=-g -I .
 C_SOURCES=$(shell find . -name "*.c" ! -name "test_*.c")
 C_OBJECTS=$(patsubst %.c, %.o, $(C_SOURCES))
 HEADERS=$(shell find . -name "*.h")
 TEMP=$(shell find . -name "*~")
 
 $(TARGET): $(C_OBJECTS)
-	$(CC) $^ -o $@
+	$(CC) $^ -g -o $@
 
 %.o: $(C_SOURCES) %.h
 	$(CC) $(CFLAGS) -c $< -o $@

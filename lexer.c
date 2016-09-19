@@ -76,6 +76,10 @@ void scan_word(FILE *input, int c, int indicator) {
             lex_list[lex_index].token = DEFINE;
         } else if (strcmp(value, "return") == 0) {
             lex_list[lex_index].token = RETURN;
+        } else if (strcmp(value, "true") == 0) {
+            lex_list[lex_index].token = TRUE;
+        } else if (strcmp(value, "false") == 0) {
+            lex_list[lex_index].token = FALSE;
         } else {
             lex_list[lex_index].token = IDENTIFIER;
         }
@@ -157,6 +161,17 @@ void lexer(FILE *input) {
             } else {
                 LOG("%s\n", "'=' scanned");
                 ASSIGN_LEX_LIST("=", ASSIGN, line);
+            }
+            continue;
+        }
+        if (c == '!') {
+            if (peek(input) == '=') {
+                LOG("%s\n", "'!=' scanned");
+                consume_char(input);
+                ASSIGN_LEX_LIST("!=", NEQ, line);
+            } else {
+                LOG("%s\n", "'!' scanned");
+                ASSIGN_LEX_LIST("!", EXCLAM, line);
             }
             continue;
         }
