@@ -11,7 +11,6 @@ static int parse_index = 0;
 static lex *curtok;
 
 ast_t *parse_expression();
-void print_ast(ast_t *, int);
 
 static int get_precedence(lex *current) {
     if (!current)

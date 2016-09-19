@@ -76,7 +76,8 @@ enum __ast_type {
     FUNCTIONAST,
 };
 
-#define ast_object ast_type type
+#define ast_object \
+    ast_type type
 
 typedef struct env_s {
 
@@ -184,5 +185,6 @@ void print_lexer_result();
 
 // parser.c
 ast_t *parser();
+void print_ast(ast_t *, int);
 
 #endif /* !TT_H */
