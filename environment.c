@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "environment.h"
+#include "tt.h"
 
 environment *init_env() {
     environment *env = (environment*)malloc(sizeof(environment));

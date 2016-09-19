@@ -12,8 +12,10 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include "hlist.h"
 
 #define DEBUG
+#undef DEBUG
 
 #ifdef DEBUG
     #define LOG(format, ...) \
@@ -174,6 +176,28 @@ struct _function_ast_s {
 
 #define PRINTF_ENUM(e) \
     printf("[print] ENUM %d"#e"\n", e)
+
+// for environment
+typedef struct environment_s environment;
+typedef struct env_node_s env_node;
+
+struct environment_s {
+    hlist_t hlist;
+    struct environment_s *prev;
+};
+
+struct env_node_s {
+    ast_t *variable;
+    ast_t *value;
+    hlist_node_t node;
+};
+
+environment *init_env();
+void print_env(environment*);
+void define_variable(ast_t *, ast_t *, environment *);
+environment *extend_environment(environment*);
+ast_t *lookup_variable(ast_t *, environment *);
+int set_variable_value(ast_t *, ast_t *, environment*);
 
 
 extern lex lex_list[MAX_STRING];
