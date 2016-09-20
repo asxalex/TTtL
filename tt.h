@@ -220,10 +220,10 @@ typedef struct _while_ast {
     ast_object;
     ast_t *condition;
     expressions *body;
-} while_ast;
+} while_ast_t;
 
 #define new_while_ast(x, cond, no) \
-    x = (while_ast*)malloc(sizeof(while_ast)); \
+    x = (while_ast_t*)malloc(sizeof(while_ast_t)); \
     x->type = WHILEAST; \
     x->line = no; \
     x->condition = cond
@@ -233,10 +233,10 @@ typedef struct _if_ast {
     ast_t *condition;
     expressions *then;
     expressions *els;
-} if_ast;
+} if_ast_t;
 
 #define new_if_ast(x, cond, no) \
-    x = (if_ast*)malloc(sizeof(if_ast)); \
+    x = (if_ast_t*)malloc(sizeof(if_ast_t)); \
     x->type = IFAST; \
     x->line = no; \
     x->condition = cond

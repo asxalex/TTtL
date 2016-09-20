@@ -75,8 +75,8 @@ ast_t *eval_variable(ast_t *exp, environment *env) {
 
 // define a function
 ast_t *eval_definition(ast_t *exp, environment *env) {
-    if (exp->type != BINARYAST) {
-        ERRORF(exp->line, parse assignment error);
+    if (exp->type != FUNCTIONAST) {
+        ERRORF(exp->line, incorrect Function ast type);
     }
     binary_ast_t *binary = (binary_ast_t*)exp;
     ast_t *var = binary->lhs;
@@ -90,7 +90,7 @@ ast_t *eval_while(ast_t *exp, environment *env) {
     if (exp->type != WHILEAST) {
         ERRORF(exp->line, eval whileast error);
     }
-    while_ast *wh = (while_ast*)exp;
+    while_ast_t *wh = (while_ast_t*)exp;
 
     while(1) {
         ast_t *bool = eval(wh->condition, env);
@@ -107,7 +107,7 @@ ast_t *eval_while(ast_t *exp, environment *env) {
 }
 
 ast_t *eval_if(ast_t *exp, environment *env) {
-    if_ast *ifast = (if_ast*) exp;
+    if_ast_t *ifast = (if_ast_t*) exp;
     ast_t *cond = eval(ifast->condition, env);
     if (!IS(cond, BOOLEANAST)) {
         ERRORF(cond->line, a boolean is required in condition);
