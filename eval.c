@@ -66,11 +66,11 @@ ast_t *eval_binary(ast_t *exp, environment *env) {
 }
 
 ast_t *eval_variable(ast_t *exp, environment *env) {
-    ast_t *r = lookup_variable(exp, env);
+    ast_t **r = lookup_variable(exp, env);
     if (!r) {
         ERRORF(exp->line, cannot find variable);
     }
-    return r;
+    return *r;
 }
 
 // define a function
@@ -115,7 +115,9 @@ ast_t *eval_if(ast_t *exp, environment *env) {
     if (((boolean_ast_t*)cond)->value == 1) {
         eval_expressions(ifast->then, env);
     } else {
-        eval_expressions(ifast->els, env);
+        if (ifast->els) {
+            eval_expressions(ifast->els, env);
+        }
     }
     return NULL;
 }

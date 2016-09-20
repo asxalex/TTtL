@@ -53,9 +53,25 @@ environment *extend_environment(environment *env) {
     return new_frame;
 }
 
-ast_t *lookup_variable(ast_t *var, environment* env) {
+ast_t **lookup_variable_in_current_frame(ast_t *var, environment *env) {
     environment *temp_env = env;
-    char *dest = ((string_ast_t*)var)->value;
+    char *dest = ((variable_ast_t*)var)->value;
+    env_node *node;
+    hlist_t *hlist = &temp_env->hlist;
+    hlist_node_t *iter;
+    hlist_for_each(hlist, iter) {
+        node = hlist_entry(iter, env_node, node);
+        char *v = ((string_ast_t*)(node->variable))->value;
+        if (strcmp(dest, v) == 0) {
+            return &node->value;
+        }
+    }
+    return NULL;
+}
+
+ast_t **lookup_variable(ast_t *var, environment* env) {
+    environment *temp_env = env;
+    char *dest = ((variable_ast_t*)var)->value;
     env_node *node;
     while (temp_env != NULL) {
         hlist_t *hlist = &temp_env->hlist;
@@ -64,7 +80,7 @@ ast_t *lookup_variable(ast_t *var, environment* env) {
             node = hlist_entry(iter, env_node, node);
             char *v = ((string_ast_t*)(node->variable))->value;
             if (strcmp(dest, v) == 0) {
-                return node->value;
+                return &node->value;
             }
         }
 
@@ -74,12 +90,12 @@ ast_t *lookup_variable(ast_t *var, environment* env) {
 }
 
 int set_variable_value(ast_t *var, ast_t *val, environment *env) {
-    ast_t *target = lookup_variable(var, env);
+    ast_t **target = lookup_variable(var, env);
     if (!target) {
         return -1;
     }
-    ast_t *temp = target;
-    target = val;
-    free(temp);
+    ast_t **temp = target;
+    *target = val;
+    free(*temp);
     return 0;
 }

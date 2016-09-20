@@ -15,7 +15,6 @@
 #include "hlist.h"
 
 #define DEBUG
-#undef DEBUG
 
 #ifdef DEBUG
     #define LOG(format, ...) \
@@ -264,7 +263,8 @@ environment *init_env();
 void print_env(environment*);
 void define_variable(ast_t *, ast_t *, environment *);
 environment *extend_environment(environment*);
-ast_t *lookup_variable(ast_t *, environment *);
+ast_t **lookup_variable(ast_t *, environment *);
+ast_t **lookup_variable_in_current_frame(ast_t *, environment *);
 int set_variable_value(ast_t *, ast_t *, environment*);
 // end for environment
 

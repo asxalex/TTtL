@@ -11,6 +11,7 @@ ast_t *eval_equal(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, env);
     ast_t *right = eval(binary->rhs, env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
+        printf("left->type = %d, right->type=%d\n", left->type, right->type);
         ERRORF(binary->line, 比较操作只能用于数字);
     }
     boolean_ast_t *b;
@@ -42,8 +43,15 @@ ast_t *eval_assignment(binary_ast_t *binary, environment *env) {
     if (!is_variable(var)) {
         ERRORF(binary->line, 被赋值变量有误);
     }
+
     ast_t *val = eval(binary->rhs, env);
-    define_variable(var, val, env);
+    ast_t **v = lookup_variable_in_current_frame(var, env); if (!v) {
+        LOG("%s\n", "in defining variable");
+        define_variable(var, val, env);
+    } else {
+        LOG("%s\n", "in setting variable value"); 
+        set_variable_value(var, val, env);
+    }
     return NULL;
 }
 
