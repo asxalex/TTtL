@@ -74,12 +74,12 @@ void scan_word(FILE *input, int c, int indicator) {
             lex_list[lex_index].token = WHILE;
         } else if (strcmp(value, "define") == 0) {
             lex_list[lex_index].token = DEFINE;
-        } else if (strcmp(value, "return") == 0) {
-            lex_list[lex_index].token = RETURN;
         } else if (strcmp(value, "true") == 0) {
             lex_list[lex_index].token = TRUE;
         } else if (strcmp(value, "false") == 0) {
             lex_list[lex_index].token = FALSE;
+        } else if (strcmp(value, "print") == 0) {
+            lex_list[lex_index].token = PRINT;
         } else {
             lex_list[lex_index].token = IDENTIFIER;
         }
@@ -114,7 +114,6 @@ void lexer(FILE *input) {
         }
         if (c == ':') {
             LOG("%s\n", "':' scanned");
-            printf("4\n");
             ASSIGN_LEX_LIST(":", COLON, line);
             continue;
         }
@@ -183,6 +182,26 @@ void lexer(FILE *input) {
             } else {
                 LOG("%s\n", "'>' scanned");
                 ASSIGN_LEX_LIST(">", GT, line);
+            }
+            continue;
+        }
+        if (c == '|') {
+            if(peek(input) == '|') {
+                LOG("%s\n", "'||' scanned");
+                consume_char(input);
+                ASSIGN_LEX_LIST("||", OR, line);
+            } else {
+                ERRORF(line, OR needs two slash)
+            }
+            continue;
+        }
+        if (c == '&') {
+            if(peek(input) == '&') {
+                LOG("%s\n", "'&&' scanned");
+                consume_char(input);
+                ASSIGN_LEX_LIST("&&", AND, line);
+            } else {
+                ERRORF(line, AND needs two and)
             }
             continue;
         }

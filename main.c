@@ -10,8 +10,8 @@
 int main() {
     FILE *fp = fopen("a.tt", "r");
     lexer(fp);
-    print_lexer_result();
-    printf("=================================\n");
+    //print_lexer_result();
+    //printf("=================================\n");
     fclose(fp);
     expressions *exps = parser();
     environment *env = init_env();

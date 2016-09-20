@@ -20,6 +20,8 @@ static int get_precedence(lex *current) {
     if (!current)
         return -2;
     TOKEN token = current->token;
+    if (token == OR || token == AND) 
+        return 2;
     if (token == ASSIGN)
         return 5;
     if (token == LT || token == GT || token == EQUAL || token == LTE || token == GTE || token == NEQ)
@@ -66,7 +68,7 @@ expressions *gather_expression() {
 }
 
 ast_t *parse_while() {
-    while_ast *res;
+    while_ast_t *res;
     get_next_token(); // skip while
     lex *current = curtok;
     if (current->token != LPARAN) {
@@ -91,7 +93,7 @@ ast_t *parse_while() {
 }
 
 ast_t *parse_if() {
-    if_ast *res;
+    if_ast_t *res;
     get_next_token(); // skip if
     lex *current = curtok;
     if (current->token != LPARAN) {
@@ -158,6 +160,15 @@ ast_t *parse_boolean() {
     return (ast_t*)res;
 }
 
+ast_t *parse_print() {
+    print_ast_t *print;
+    lex *current = curtok;
+    get_next_token();
+    ast_t *a = parse_primary();
+    new_print_ast(print, a, current->line);
+    return (ast_t*)print;
+}
+
 ast_t *parse_number() {
     lex *current = curtok;
     long sum = 0;
@@ -215,7 +226,7 @@ expressions* gather_function_params() {
 
 ast_t *parse_function() {
     lex *current;
-    get_next_token(); // skip define
+    get_next_token(); // skip define 
     function_ast_t *function;
     new_function_ast(function, curtok->value, curtok->line);
     curtok->value = NULL;
@@ -273,6 +284,12 @@ ast_t *parse_primary() {
             res = parse_boolean();
             get_next_token();
             return res;
+        case PRINT:
+            res = parse_print();
+            return res;
+        case SEMICOLON:
+            get_next_token(); // skip SEMICOLON
+            return parse_primary();
         default:
             printf("token is %d\n", curtok->token);
             ERRORF(curtok->line, unexpected token);
@@ -384,18 +401,18 @@ void print_ast(ast_t *t, int depth) {
         case IFAST:
             pretty_format(depth);
             printf("if ");
-            print_ast(((if_ast*)t)->condition, depth+1);
+            print_ast(((if_ast_t*)t)->condition, depth+1);
             printf("then ");
-            print_expression(((if_ast*)t)->then, depth+1);
+            print_expression(((if_ast_t*)t)->then, depth+1);
             printf("else ");
-            print_expression(((if_ast*)t)->els, depth+1);
+            print_expression(((if_ast_t*)t)->els, depth+1);
             break;
         case WHILEAST:
             pretty_format(depth);
             printf("while ");
-            print_ast(((while_ast*)t)->condition, depth+1);
+            print_ast(((while_ast_t*)t)->condition, depth+1);
             printf("body ");
-            print_expression(((while_ast*)t)->body, depth+1);
+            print_expression(((while_ast_t*)t)->body, depth+1);
             break;
         case FUNCTIONAST:
             pretty_format(depth);
@@ -413,8 +430,13 @@ void print_ast(ast_t *t, int depth) {
             printf("args ");
             print_expression(((call_ast_t*)t)->args, depth+1);
             break;
+        case PRINTAST:
+            pretty_format(depth);
+            printf("return ");
+            print_ast(((print_ast_t*)t)->ast, depth+1);
+            break;
         default:
-            printf("ast type is %d\n", (t->type == IFAST));
+            printf("ast type is %d\n", t->type);
             ERRORF(t->line, no such ast type);
     }
 }
@@ -423,6 +445,17 @@ expressions *parser() {
     get_next_token();
     expressions *ast = gather_expression();
     return ast;
+
+    /*
+    expression *exp;
+    hlist_node_t *iter;
+    hlist_for_each(ast, iter) {
+        exp = hlist_entry(iter, expression, node);
+        print_ast(exp->ast, 0);
+    }
+    */
+    //print_expression(ast, 0);
+    //printf("\n");
     /*
     ast_t *ast;
     while(1) {

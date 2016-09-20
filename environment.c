@@ -55,6 +55,7 @@ environment *extend_environment(environment *env) {
 
 ast_t **lookup_variable_in_current_frame(ast_t *var, environment *env) {
     environment *temp_env = env;
+
     char *dest = ((variable_ast_t*)var)->value;
     env_node *node;
     hlist_t *hlist = &temp_env->hlist;
@@ -96,6 +97,6 @@ int set_variable_value(ast_t *var, ast_t *val, environment *env) {
     }
     ast_t **temp = target;
     *target = val;
-    free(*temp);
+    //free(*temp);
     return 0;
 }

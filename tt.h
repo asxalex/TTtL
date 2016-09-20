@@ -15,6 +15,7 @@
 #include "hlist.h"
 
 #define DEBUG
+#undef DEBUG
 
 #ifdef DEBUG
     #define LOG(format, ...) \
@@ -60,6 +61,9 @@ enum __token {
     RETURN, // return 30
     TRUE, // true
     FALSE, // false
+    OR, // ||
+    AND, // &&
+    PRINT, // print
 };
 
 struct __lex {
@@ -82,6 +86,7 @@ enum __ast_type {
     IFAST,
     WHILEAST,
     BOOLEANAST,
+    PRINTAST,
 };
 
 typedef struct environment_s environment;
@@ -190,6 +195,17 @@ typedef struct _identifier_ast_s {
     ast_object;
     char *value;
 } identifier_ast_t;
+
+typedef struct _print_ast_s {
+    ast_object;
+    ast_t *ast;
+} print_ast_t;
+
+#define new_print_ast(x, a, no) \
+    x = (print_ast_t*)malloc(sizeof(print_ast_t)); \
+    x->type = PRINTAST; \
+    x->line = no; \
+    x->ast = a
 
 typedef struct _call_ast_s {
     ast_object;
@@ -303,6 +319,8 @@ ast_t *eval_add(binary_ast_t*, environment *);
 ast_t *eval_sub(binary_ast_t*, environment *);
 ast_t *eval_mul(binary_ast_t*, environment *);
 ast_t *eval_div(binary_ast_t*, environment *);
+ast_t *eval_or(binary_ast_t*, environment *);
+ast_t *eval_and(binary_ast_t*, environment *);
 
 // for apply
 ast_t *apply(ast_t *function, environment*);
