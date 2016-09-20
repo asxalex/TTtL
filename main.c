@@ -16,7 +16,7 @@ int main() {
     expressions *exps = parser();
     environment *env = init_env();
     eval_expressions(exps, env);
-    print_env(env);
+    //print_env(env);
     return 0;
 }
 
