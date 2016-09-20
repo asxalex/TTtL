@@ -44,10 +44,14 @@ void scan_word(FILE *input, int c, int indicator) {
         ungetc(c, input);
         lex_list[lex_index].token = NUMBER;
     } else {
+        char last = ' ';
         if (indicator == 1) {
-            while((c = getc(input)) != EOF && c != '"') {
+            while((c = getc(input)) != EOF && ((c != '"') || (c == '"' && last == '\\'))) {
+                last = c;
                 if (c == '\n')
                     line++;
+                if (c == '\\')
+                    continue;
                 lex_list[lex_index].value[i++] = c;
             }
             if (c == EOF) {

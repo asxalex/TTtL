@@ -174,9 +174,9 @@ typedef struct _character_ast_s {
     char value;
 } character_ast_t;
 
-#define new_character_ast(x, v) \
+#define new_character_ast(x, v, no) \
     x = (character_ast_t*)malloc(sizeof(character_ast_t)); \
-    x->line = -1; \
+    x->line = no; \
     x->type = CHARACTERAST; \
     x->value = v
 

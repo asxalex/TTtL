@@ -76,6 +76,7 @@ ast_t *eval_variable(ast_t *exp, environment *env) {
     if (!r) {
         ERRORF(exp->line, cannot find variable);
     }
+
     return *r;
 }
 
@@ -213,8 +214,9 @@ ast_t *eval_function_call(ast_t *exp, environment *env) {
 */
 
 ast_t *eval(ast_t *exp, environment *env) {
-    if (is_self_evaluating(exp))
+    if (is_self_evaluating(exp)) {
         return exp;
+    }
     switch (exp->type) { 
         case VARIABLEAST:
             return eval_variable(exp, env);

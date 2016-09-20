@@ -131,7 +131,7 @@ ast_t *parse_identifier() {
     lex *current = curtok; 
     get_next_token(); // skip identifier
     lex *next = curtok;
-    if (next->token == LPARAN) {
+    if (next && next->token == LPARAN) {
         // function call;
         call_ast_t *call;
         new_call_ast(call, current->line);
@@ -224,6 +224,30 @@ expressions* gather_function_params() {
     return exps;
 }
 
+ast_t *parse_character() {
+    character_ast_t *s;
+    new_character_ast(s, curtok->value[0], curtok->line);
+    free(curtok->value);
+    get_next_token();
+    if(curtok->token != SINGLEQUOTE) {
+        ERRORF(curtok->line, require single quote here);
+    }
+    get_next_token(); // skip DOUBLEQUOTE
+    return (ast_t*)s;
+}
+
+ast_t *parse_string() {
+    string_ast_t *s;
+    new_string_ast(s, curtok->value, curtok->line);
+    curtok->value = NULL;
+    get_next_token();
+    if(curtok->token != DOUBLEQUOTE) {
+        ERRORF(curtok->line, require double quote here);
+    }
+    get_next_token(); // skip DOUBLEQUOTE
+    return (ast_t*)s;
+}
+
 ast_t *parse_function() {
     lex *current;
     get_next_token(); // skip define 
@@ -290,6 +314,14 @@ ast_t *parse_primary() {
         case SEMICOLON:
             get_next_token(); // skip SEMICOLON
             return parse_primary();
+        case DOUBLEQUOTE:
+            get_next_token(); // skip double quote
+            res = parse_string();
+            return res;
+        case SINGLEQUOTE:
+            get_next_token(); // skip single quote
+            res = parse_character();
+            return res;
         default:
             printf("token is %d\n", curtok->token);
             ERRORF(curtok->line, unexpected token);
