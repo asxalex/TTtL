@@ -29,10 +29,27 @@ void pass_word(FILE *fp) {
     }
 }
 
+static char get_backslash_char(char a) {
+    switch(a) {
+        case 'n':
+            return '\n';
+        case 't':
+            return '\t';
+        case 'a':
+            return '\a';
+        default:
+            return a;
+    }
+}
+
 void scan_word(FILE *input, int c, int indicator) {
     lex_list[lex_index].value = malloc(MAX_WORD_SIZE);
     int i = 0;
-    lex_list[lex_index].value[i++] = c;
+    if (c != '\\') {
+        lex_list[lex_index].value[i++] = c;
+    } else {
+        lex_list[lex_index].value[i++] = get_backslash_char(getc(input));
+    }
 
     if (indicator == 0 && isdigit(c)) {
         while (isdigit(c = getc(input))) {
@@ -47,6 +64,11 @@ void scan_word(FILE *input, int c, int indicator) {
         char last = ' ';
         if (indicator == 1) {
             while((c = getc(input)) != EOF && ((c != '"') || (c == '"' && last == '\\'))) {
+                if (last == '\\') {
+                    last = c;
+                    lex_list[lex_index].value[i++] = get_backslash_char(c);
+                    continue;
+                }
                 last = c;
                 if (c == '\n')
                     line++;

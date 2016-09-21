@@ -104,6 +104,11 @@ ast_t *eval_function_call(ast_t *exp, environment *env) {
         ERRORF(exp->line, not a function call type);
     }
     call_ast_t *call = (call_ast_t*)exp;
+
+    if (strcmp(call->name, "printf") == 0) {
+        return internal_printf(exp, env);
+    }
+
     variable_ast_t *variable;
     new_variable_ast(variable, call->name, exp->line);
 
