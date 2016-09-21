@@ -5,7 +5,7 @@ endif
 syntax keyword ttKeyword define if while else
 highlight link ttKeyword Keyword
 
-syntax keyword ttFunction print
+syntax keyword ttFunction printf
 highlight link ttFunction Function
 
 syntax match ttComment "\v#.*$"
