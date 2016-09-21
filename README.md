@@ -13,7 +13,7 @@ define fib(n) {
 
 i = 0
 while(i <= 10) {
-    print fib(i)
+    printf("%d\n", fib(i))
     i = i + 1
 }
 ```
