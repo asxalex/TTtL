@@ -187,31 +187,6 @@ ast_t *eval_if(ast_t *exp, environment *env) {
     return res;
 }
 
-ast_t *eval_print(ast_t *exp, environment *env) {
-    print_ast_t *p = (print_ast_t *)exp;
-    ast_t *res = eval(p->ast, env);
-    switch (res->type) {
-        case NUMBERAST:
-            printf("%ld\n",((number_ast_t*)res)->value);
-            break;
-        case STRINGAST:
-            printf("\"%s\"\n",((string_ast_t*)res)->value);
-            break;
-        case CHARACTERAST:
-            printf("'%c'\n",((character_ast_t*)res)->value);
-            break;
-        case BOOLEANAST:
-            if (((boolean_ast_t*)res)->value == 1)
-                printf("True\n");
-            else
-                printf("False\n");
-            break;
-        default:
-            ERRORF(res->line, invalid type);
-    }
-    return NULL;
-}
-
 /*
 ast_t *eval_function_call(ast_t *exp, environment *env) {
     return apply(exp, env);
@@ -235,8 +210,6 @@ ast_t *eval(ast_t *exp, environment *env) {
             return eval_while(exp, env);
         case BINARYAST:
             return eval_binary(exp, env);
-        case PRINTAST:
-            return eval_print(exp, env);
         default:
             ERRORF(exp->line, invalid usage);
     }

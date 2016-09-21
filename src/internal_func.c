@@ -14,17 +14,11 @@ static ast_t* check_format(expression *node, ast_type t, environment *env) {
     ast_t *exp = node->ast;
     if (exp->type == t) 
         return exp;
-    if (exp->type == VARIABLEAST) {
-        ast_t **val = lookup_variable(exp, env);
-        if (!val) {
-            return NULL;
-        }
-        if((*val)->type != t) {
-            return NULL;
-        }
-        return *val;
+    ast_t *res = eval(exp, env);
+    if (!res || res->type != t) {
+        return NULL;
     }
-    return NULL;
+    return res;
 }
 
 ast_t *internal_printf(ast_t *exp, environment *env) {

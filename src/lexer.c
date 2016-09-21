@@ -85,7 +85,6 @@ void scan_word(FILE *input, int c, int indicator) {
             }
         } else if (indicator == 2) {
             if ((c = getc(input)) != '\'') {
-                //printf("c = %d\n", c);
                 ERRORF(line, unmatched single quote);
             }
         }
@@ -104,8 +103,6 @@ void scan_word(FILE *input, int c, int indicator) {
             lex_list[lex_index].token = TRUE;
         } else if (strcmp(value, "false") == 0) {
             lex_list[lex_index].token = FALSE;
-        } else if (strcmp(value, "print") == 0) {
-            lex_list[lex_index].token = PRINT;
         } else {
             lex_list[lex_index].token = IDENTIFIER;
         }

@@ -160,15 +160,6 @@ ast_t *parse_boolean() {
     return (ast_t*)res;
 }
 
-ast_t *parse_print() {
-    print_ast_t *print;
-    lex *current = curtok;
-    get_next_token();
-    ast_t *a = parse_primary();
-    new_print_ast(print, a, current->line);
-    return (ast_t*)print;
-}
-
 ast_t *parse_number() {
     lex *current = curtok;
     long sum = 0;
@@ -307,9 +298,6 @@ ast_t *parse_primary() {
         case FALSE:
             res = parse_boolean();
             get_next_token();
-            return res;
-        case PRINT:
-            res = parse_print();
             return res;
         case SEMICOLON:
             get_next_token(); // skip SEMICOLON
@@ -461,11 +449,6 @@ void print_ast(ast_t *t, int depth) {
             printf("%s ", ((call_ast_t*)t)->name);
             printf("args ");
             print_expression(((call_ast_t*)t)->args, depth+1);
-            break;
-        case PRINTAST:
-            pretty_format(depth);
-            printf("return ");
-            print_ast(((print_ast_t*)t)->ast, depth+1);
             break;
         default:
             printf("ast type is %d\n", t->type);
