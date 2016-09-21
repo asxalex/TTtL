@@ -267,6 +267,7 @@ environment *init_env();
 void print_env(environment*);
 void define_variable(ast_t *, ast_t *, environment *);
 environment *extend_environment(environment*);
+environment *extend_environment_back(environment**);
 ast_t **lookup_variable(ast_t *, environment *);
 ast_t **lookup_variable_in_current_frame(ast_t *, environment *);
 int set_variable_value(ast_t *, ast_t *, environment*);
@@ -291,7 +292,7 @@ void init_expressions(expressions *);
 void add_after_expression(expression *, expression *);
 
 // for eval
-ast_t *eval(ast_t *, environment *);
+ast_t *eval(ast_t *, environment **);
 ast_t *eval_expressions(expressions *, environment *);
 int is_variable(ast_t *);
 
@@ -312,5 +313,6 @@ ast_t *eval_and(binary_ast_t*, environment *);
 
 // for internal_func
 ast_t *internal_printf(ast_t*, environment*);
+ast_t *internal_require(ast_t*, environment**);
 
 #endif /* !TT_H */

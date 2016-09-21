@@ -8,8 +8,8 @@
 #include "tt.h"
 
 ast_t *eval_equal(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -23,8 +23,8 @@ ast_t *eval_equal(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_notequal(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -43,7 +43,7 @@ ast_t *eval_assignment(binary_ast_t *binary, environment *env) {
         ERRORF(binary->line, 被赋值变量有误);
     }
 
-    ast_t *val = eval(binary->rhs, env);
+    ast_t *val = eval(binary->rhs, &env);
     ast_t **v = lookup_variable_in_current_frame(var, env); 
     if (!v) {
         define_variable(var, val, env);
@@ -54,8 +54,8 @@ ast_t *eval_assignment(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_greater(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -69,8 +69,8 @@ ast_t *eval_greater(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_ge(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -84,8 +84,8 @@ ast_t *eval_ge(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_less(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -99,8 +99,8 @@ ast_t *eval_less(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_le(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -114,8 +114,8 @@ ast_t *eval_le(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_add(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -126,8 +126,8 @@ ast_t *eval_add(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_sub(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -138,8 +138,8 @@ ast_t *eval_sub(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_mul(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -150,8 +150,8 @@ ast_t *eval_mul(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_div(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *left = eval(binary->lhs, &env);
+    ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
         ERRORF(binary->line, 比较操作只能用于数字);
     }
@@ -165,7 +165,7 @@ ast_t *eval_div(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_or(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
+    ast_t *left = eval(binary->lhs, &env);
     if (left->type != BOOLEANAST) {
         ERRORF(left->line, needs boolean here);
     }
@@ -175,7 +175,7 @@ ast_t *eval_or(binary_ast_t *binary, environment *env) {
         return (ast_t*)res;
     }
     
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *right = eval(binary->rhs, &env);
     if (right->type != BOOLEANAST) {
         ERRORF(right->line, needs boolean here);
     }
@@ -189,7 +189,7 @@ ast_t *eval_or(binary_ast_t *binary, environment *env) {
 }
 
 ast_t *eval_and(binary_ast_t *binary, environment *env) {
-    ast_t *left = eval(binary->lhs, env);
+    ast_t *left = eval(binary->lhs, &env);
     if (left->type != BOOLEANAST) {
         ERRORF(left->line, needs boolean here);
     }
@@ -199,7 +199,7 @@ ast_t *eval_and(binary_ast_t *binary, environment *env) {
         return (ast_t*)res;
     }
     
-    ast_t *right = eval(binary->rhs, env);
+    ast_t *right = eval(binary->rhs, &env);
     if (right->type != BOOLEANAST) {
         ERRORF(right->line, needs boolean here);
     }

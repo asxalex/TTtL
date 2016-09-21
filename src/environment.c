@@ -14,6 +14,26 @@ environment *init_env() {
     return env;
 }
 
+ast_t **lookup_variable(ast_t *var, environment* env) {
+    environment *temp_env = env;
+    char *dest = ((variable_ast_t*)var)->value;
+    env_node *node;
+    while (temp_env != NULL) {
+        hlist_t *hlist = &temp_env->hlist;
+        hlist_node_t *iter;
+        hlist_for_each(hlist, iter) {
+            node = hlist_entry(iter, env_node, node);
+            char *v = ((string_ast_t*)(node->variable))->value;
+            if (strcmp(dest, v) == 0) {
+                return &node->value;
+            }
+        }
+        temp_env = temp_env->prev;
+    }
+    //printf("%s is not found\n", dest);
+    return NULL;
+}
+
 void print_env(environment *e) {
     environment *env = e;
     int i = 0;
@@ -22,9 +42,6 @@ void print_env(environment *e) {
         hlist_t *hlist = &env->hlist;
         hlist_node_t *iter;
         env_node *node;
-        for (iter = hlist->first; iter != NULL; iter = iter->next) {
-
-        }
         hlist_for_each(hlist, iter) {
             node = hlist_entry(iter, env_node, node);
             print_ast(node->variable, 0);
@@ -53,6 +70,13 @@ environment *extend_environment(environment *env) {
     return new_frame;
 }
 
+environment *extend_environment_back(environment **env) {
+    environment *new_frame = (environment*)malloc(sizeof(environment));
+    INIT_HLIST_HEAD(&new_frame->hlist);
+    (*env)->prev = new_frame->prev;
+    return NULL;
+}
+
 ast_t **lookup_variable_in_current_frame(ast_t *var, environment *env) {
     environment *temp_env = env;
 
@@ -70,32 +94,13 @@ ast_t **lookup_variable_in_current_frame(ast_t *var, environment *env) {
     return NULL;
 }
 
-ast_t **lookup_variable(ast_t *var, environment* env) {
-    environment *temp_env = env;
-    char *dest = ((variable_ast_t*)var)->value;
-    env_node *node;
-    while (temp_env != NULL) {
-        hlist_t *hlist = &temp_env->hlist;
-        hlist_node_t *iter;
-        hlist_for_each(hlist, iter) {
-            node = hlist_entry(iter, env_node, node);
-            char *v = ((string_ast_t*)(node->variable))->value;
-            if (strcmp(dest, v) == 0) {
-                return &node->value;
-            }
-        }
-
-        temp_env = temp_env->prev;
-    }
-    return NULL;
-}
 
 int set_variable_value(ast_t *var, ast_t *val, environment *env) {
     ast_t **target = lookup_variable(var, env);
     if (!target) {
         return -1;
     }
-    ast_t **temp = target;
+    //ast_t **temp = target;
     *target = val;
     //free(*temp);
     return 0;

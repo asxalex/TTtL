@@ -113,6 +113,7 @@ void scan_word(FILE *input, int c, int indicator) {
 
 void lexer(FILE *input) {
     //int c = getc(input);
+    line = 1;
     int c = ' ';
 
     /* if pair == 0, there's no pair;

@@ -457,6 +457,7 @@ void print_ast(ast_t *t, int depth) {
 }
 
 expressions *parser() {
+    parse_index = 0;
     get_next_token();
     expressions *ast = gather_expression();
     return ast;

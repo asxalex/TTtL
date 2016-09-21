@@ -14,7 +14,7 @@ static ast_t* check_format(expression *node, ast_type t, environment *env) {
     ast_t *exp = node->ast;
     if (exp->type == t) 
         return exp;
-    ast_t *res = eval(exp, env);
+    ast_t *res = eval(exp, &env);
     if (!res || res->type != t) {
         return NULL;
     }
@@ -81,4 +81,31 @@ ast_t *internal_printf(ast_t *exp, environment *env) {
     }
     return NULL;
 }
+
+ast_t *internal_require(ast_t *exp, environment **env) {
+    //printf("in require %d\n", exp->type);
+    call_ast_t *call = (call_ast_t*)exp;
+    expressions *e = call->args;
+    hlist_node_t *iter = e->first;
+    if (!iter) {
+        ERRORF(call->line, REQUIRE needs an argument);
+    }
+    if (iter->next) {
+        ERRORF(call->line, too many arguments are passed to REQUIRE);
+    }
+    expression *ee = hlist_entry(iter, expression, node);
+    if (ee->ast->type != STRINGAST) {
+        ERRORF(call->line, REQUIRE needs a string argument);
+    }
+
+    lex_index = 0; 
+    environment *new = extend_environment(*env);
+    FILE *fp = fopen(((string_ast_t*)ee->ast)->value, "r");
+    lexer(fp);
+    fclose(fp);
+    expressions *exps = parser();
+    *env = new;
+    eval_expressions(exps, *env);
+    return NULL;
+};
 

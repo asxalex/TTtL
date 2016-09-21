@@ -99,27 +99,32 @@ ast_t *eval_definition(ast_t *exp, environment *env) {
     return NULL;
 }
 
-ast_t *eval_function_call(ast_t *exp, environment *env) {
+ast_t *eval_function_call(ast_t *exp, environment **env) {
     if(exp->type != CALLAST) {
         ERRORF(exp->line, not a function call type);
     }
     call_ast_t *call = (call_ast_t*)exp;
 
     if (strcmp(call->name, "printf") == 0) {
-        return internal_printf(exp, env);
+        return internal_printf(exp, *env);
+    }
+    if (strcmp(call->name, "require") == 0) {
+        ast_t *res = internal_require(exp, env);
+        //print_env(*env);
+        return res;
     }
 
     variable_ast_t *variable;
     new_variable_ast(variable, call->name, exp->line);
 
 
-    ast_t **v = lookup_variable((ast_t *)variable, env);
+    ast_t **v = lookup_variable((ast_t *)variable, *env);
     if (!v) {
         ERRORF(exp->line, function has not been defined);
     }
 
     function_ast_t *function = (function_ast_t*)*v;
-    environment *new_frame = extend_environment(env);
+    environment *new_frame = extend_environment(*env);
     
     hlist_node_t *call_arg_list = call->args->first;
     hlist_node_t *func_arg_list = function->params->first;
@@ -157,7 +162,7 @@ ast_t *eval_while(ast_t *exp, environment *env) {
     while_ast_t *wh = (while_ast_t*)exp;
 
     while(1) {
-        ast_t *bool = eval(wh->condition, env);
+        ast_t *bool = eval(wh->condition, &env);
         if (!IS(bool, BOOLEANAST)) {
             ERRORF(exp->line, the condition should be boolean);
         }
@@ -173,7 +178,7 @@ ast_t *eval_while(ast_t *exp, environment *env) {
 ast_t *eval_if(ast_t *exp, environment *env) {
     ast_t *res = NULL;
     if_ast_t *ifast = (if_ast_t*) exp;
-    ast_t *cond = eval(ifast->condition, env);
+    ast_t *cond = eval(ifast->condition, &env);
     if (!IS(cond, BOOLEANAST)) {
         ERRORF(cond->line, a boolean is required in condition);
     }
@@ -193,23 +198,23 @@ ast_t *eval_function_call(ast_t *exp, environment *env) {
 }
 */
 
-ast_t *eval(ast_t *exp, environment *env) {
+ast_t *eval(ast_t *exp, environment **env) {
     if (is_self_evaluating(exp)) {
         return exp;
     }
     switch (exp->type) { 
         case VARIABLEAST:
-            return eval_variable(exp, env);
+            return eval_variable(exp, *env);
         case FUNCTIONAST:
-            return eval_definition(exp, env);
+            return eval_definition(exp, *env);
         case CALLAST:
             return eval_function_call(exp, env);
         case IFAST:
-            return eval_if(exp, env);
+            return eval_if(exp, *env);
         case WHILEAST:
-            return eval_while(exp, env);
+            return eval_while(exp, *env);
         case BINARYAST:
-            return eval_binary(exp, env);
+            return eval_binary(exp, *env);
         default:
             ERRORF(exp->line, invalid usage);
     }
@@ -226,7 +231,7 @@ ast_t *eval_expressions(expressions* exp, environment *env) {
         if (!e->ast) {
             continue;
         }
-        res = eval(e->ast, env);
+        res = eval(e->ast, &env);
     }
     //return NULL;
     return res;
