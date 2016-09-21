@@ -16,4 +16,17 @@ while(i <= 10) {
     printf("%d\n", fib(i))
     i = i + 1
 }
+
+// now TT supports require
+// in helper.tt
+define add_3(a) {
+    a+3
+}
+
+// in main.c
+require("helper.tt")
+
+printf("%d\n", add_3(20))
 ```
+
+
