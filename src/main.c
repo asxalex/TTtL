@@ -7,8 +7,12 @@
 
 #include "tt.h"
 
-int main() {
-    FILE *fp = fopen("a.tt", "r");
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "usage: ./tt program_file.tt\n");
+        exit(-1);
+    }
+    FILE *fp = fopen(argv[1], "r");
     lexer(fp);
     //print_lexer_result();
     //printf("=================================\n");

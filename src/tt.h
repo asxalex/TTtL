@@ -322,7 +322,5 @@ ast_t *eval_div(binary_ast_t*, environment *);
 ast_t *eval_or(binary_ast_t*, environment *);
 ast_t *eval_and(binary_ast_t*, environment *);
 
-// for apply
-ast_t *apply(ast_t *function, environment*);
 
 #endif /* !TT_H */
