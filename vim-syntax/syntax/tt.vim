@@ -2,7 +2,7 @@ if exists("b:current_syntax")
     finish
 endif
 
-syntax keyword ttKeyword define if while else
+syntax keyword ttKeyword define if while else require
 highlight link ttKeyword Keyword
 
 syntax keyword ttFunction printf
