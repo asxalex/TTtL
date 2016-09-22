@@ -9,7 +9,6 @@ CFLAGS=-g -I .
 C_SOURCES=$(shell find . -name "*.c" ! -name "test_*.c")
 C_OBJECTS=$(patsubst %.c, %.o, $(C_SOURCES))
 HEADERS=$(shell find . -name "*.h")
-TEMP=$(shell find . -name "*~")
 
 $(TARGET): $(C_OBJECTS)
 	$(CC) $^ -g -o $@
@@ -18,7 +17,7 @@ $(TARGET): $(C_OBJECTS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -r $(shell find . -name "*.o") $(TEMP) $(TARGET)
+	rm -r $(shell find . -name "*.o") $(TARGET)
 
 # vim:ft=make
 #
