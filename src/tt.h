@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "hlist.h"
 
 #define DEBUG
@@ -255,9 +256,19 @@ typedef struct _if_ast {
     lex_list[lex_index].token = t; \
     lex_list[lex_index++].line = l
 
-#define ERRORF(row, str) \
-    fprintf(stderr, "in line %d error : "#str"\n", row); \
+#define ERRORF1(row, str) \
+    fprintf(stderr, "in file %s line %d error : "#str"\n", current_file, row); \
     exit(-1);
+
+static inline void ERRORF(const char *filename, int row, const char *strfmt, ...) {
+    fprintf(stderr, "in file %s, line %d Error : ", filename, row);
+    va_list ap;
+    va_start(ap, strfmt);
+    vfprintf(stderr, strfmt, ap);
+    fprintf(stderr, "\n");
+    va_end(ap);
+    exit(-1);
+}
 
 #define PRINTF_ENUM(e) \
     printf("[print] ENUM %d"#e"\n", e)
@@ -276,6 +287,7 @@ int set_variable_value(ast_t *, ast_t *, environment*);
 // for lexer
 extern lex lex_list[MAX_STRING];
 extern int lex_index;
+extern char *current_file;
 
 void lexer(FILE *);
 void print_lexer_result();

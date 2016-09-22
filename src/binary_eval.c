@@ -11,7 +11,7 @@ ast_t *eval_equal(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     boolean_ast_t *b;
     if (((number_ast_t*)left)->value == ((number_ast_t*)right)->value) {
@@ -26,7 +26,7 @@ ast_t *eval_notequal(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     boolean_ast_t *b;
     if (((number_ast_t*)left)->value != ((number_ast_t*)right)->value) {
@@ -40,7 +40,7 @@ ast_t *eval_notequal(binary_ast_t *binary, environment *env) {
 ast_t *eval_assignment(binary_ast_t *binary, environment *env) {
     ast_t *var = binary->lhs;
     if (!is_variable(var)) {
-        ERRORF(binary->line, 被赋值变量有误);
+        ERRORF(current_file, binary->line, "被赋值变量有误");
     }
 
     ast_t *val = eval(binary->rhs, &env);
@@ -57,7 +57,7 @@ ast_t *eval_greater(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     boolean_ast_t *b;
     if (((number_ast_t*)left)->value > ((number_ast_t*)right)->value) {
@@ -72,7 +72,7 @@ ast_t *eval_ge(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     boolean_ast_t *b;
     if (((number_ast_t*)left)->value >= ((number_ast_t*)right)->value) {
@@ -87,7 +87,7 @@ ast_t *eval_less(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     boolean_ast_t *b;
     if (((number_ast_t*)left)->value < ((number_ast_t*)right)->value) {
@@ -102,7 +102,7 @@ ast_t *eval_le(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     boolean_ast_t *b;
     if (((number_ast_t*)left)->value <= ((number_ast_t*)right)->value) {
@@ -117,7 +117,7 @@ ast_t *eval_add(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     number_ast_t *b;
     long v = ((number_ast_t*)left)->value + ((number_ast_t*)right)->value;
@@ -129,7 +129,7 @@ ast_t *eval_sub(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     number_ast_t *b;
     long v = ((number_ast_t*)left)->value - ((number_ast_t*)right)->value;
@@ -141,7 +141,7 @@ ast_t *eval_mul(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     number_ast_t *b;
     long v = ((number_ast_t*)left)->value * ((number_ast_t*)right)->value;
@@ -153,11 +153,11 @@ ast_t *eval_div(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     ast_t *right = eval(binary->rhs, &env);
     if (left->type != NUMBERAST || right->type != NUMBERAST) {
-        ERRORF(binary->line, 比较操作只能用于数字);
+        ERRORF(current_file, binary->line, "比较操作只能用于数字");
     }
     number_ast_t *b;
     if (((number_ast_t*)right)->value == 0) {
-        ERRORF(right->line, 除数不能为0);
+        ERRORF(current_file, right->line, "除数不能为0");
     }
     long v = ((number_ast_t*)left)->value / ((number_ast_t*)right)->value;
     new_number_ast(b, v, binary->line);
@@ -167,7 +167,7 @@ ast_t *eval_div(binary_ast_t *binary, environment *env) {
 ast_t *eval_or(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     if (left->type != BOOLEANAST) {
-        ERRORF(left->line, needs boolean here);
+        ERRORF(current_file, left->line, "needs boolean here");
     }
     boolean_ast_t *res;
     if (((boolean_ast_t*)left)->value == 1) {
@@ -177,7 +177,7 @@ ast_t *eval_or(binary_ast_t *binary, environment *env) {
     
     ast_t *right = eval(binary->rhs, &env);
     if (right->type != BOOLEANAST) {
-        ERRORF(right->line, needs boolean here);
+        ERRORF(current_file, right->line, "needs boolean here");
     }
 
     if (((boolean_ast_t*)right)->value == 1) {
@@ -191,7 +191,7 @@ ast_t *eval_or(binary_ast_t *binary, environment *env) {
 ast_t *eval_and(binary_ast_t *binary, environment *env) {
     ast_t *left = eval(binary->lhs, &env);
     if (left->type != BOOLEANAST) {
-        ERRORF(left->line, needs boolean here);
+        ERRORF(current_file, left->line, "needs boolean here");
     }
     boolean_ast_t *res;
     if (((boolean_ast_t*)left)->value == 0) {
@@ -201,7 +201,7 @@ ast_t *eval_and(binary_ast_t *binary, environment *env) {
     
     ast_t *right = eval(binary->rhs, &env);
     if (right->type != BOOLEANAST) {
-        ERRORF(right->line, needs boolean here);
+        ERRORF(current_file, right->line, "needs boolean here");
     }
 
     if (((boolean_ast_t*)right)->value == 1) {

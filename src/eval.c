@@ -25,7 +25,7 @@ int is_variable(ast_t *exp) {
 
 ast_t *eval_binary(ast_t *exp, environment *env) {
     if (exp->type != BINARYAST) {
-        ERRORF(exp->line, parse assignment error);
+        ERRORF(current_file, exp->line, "parse binary error, got %d", exp->type);
     }
     binary_ast_t *binary = (binary_ast_t*)exp;
     char *ops = ((string_ast_t *)binary->op)->value;
@@ -68,13 +68,14 @@ ast_t *eval_binary(ast_t *exp, environment *env) {
     if (strcmp(ops, "&&") == 0) {
         return eval_and(binary, env);
     }
-    ERRORF(exp->line, unknown binary operator);
+    ERRORF(current_file, exp->line, "unknown binary operator %s", ops);
+    return NULL;
 }
 
 ast_t *eval_variable(ast_t *exp, environment *env) {
     ast_t **r = lookup_variable(exp, env);
     if (!r) {
-        ERRORF(exp->line, cannot find variable);
+        ERRORF(current_file, exp->line, "cannot find variable %s", ((variable_ast_t*)exp)->value);
     }
 
     return *r;
@@ -83,7 +84,7 @@ ast_t *eval_variable(ast_t *exp, environment *env) {
 // define a function
 ast_t *eval_definition(ast_t *exp, environment *env) {
     if (exp->type != FUNCTIONAST) {
-        ERRORF(exp->line, incorrect Function ast type);
+        ERRORF(current_file, exp->line, "incorrect Function ast type");
     }
     function_ast_t *temp = (function_ast_t *)exp;
     variable_ast_t *var;
@@ -94,14 +95,14 @@ ast_t *eval_definition(ast_t *exp, environment *env) {
     if (!v) {
         define_variable((ast_t*)var, (ast_t*)temp, env);
     } else {
-        ERRORF(exp->line, redifinition of function);
+        ERRORF(current_file, exp->line, "redifinition of function %s", temp->name);
     }
     return NULL;
 }
 
 ast_t *eval_function_call(ast_t *exp, environment **env) {
     if(exp->type != CALLAST) {
-        ERRORF(exp->line, not a function call type);
+        ERRORF(current_file, exp->line, "not a function call type");
     }
     call_ast_t *call = (call_ast_t*)exp;
 
@@ -120,7 +121,7 @@ ast_t *eval_function_call(ast_t *exp, environment **env) {
 
     ast_t **v = lookup_variable((ast_t *)variable, *env);
     if (!v) {
-        ERRORF(exp->line, function has not been defined);
+        ERRORF(current_file, exp->line, "function %s has not been defined", call->name);
     }
 
     function_ast_t *function = (function_ast_t*)*v;
@@ -147,7 +148,7 @@ ast_t *eval_function_call(ast_t *exp, environment **env) {
         func_arg_list = func_arg_list->next;
     }
     if (call_arg_list != NULL || func_arg_list != NULL) {
-        ERRORF(exp->line, 参数个数不匹配);
+        ERRORF(current_file, exp->line, "mismatch number of arguments");
     }
     ast_t *res = eval_expressions(function->body, new_frame);
     //print_ast(res, 0);
@@ -157,14 +158,14 @@ ast_t *eval_function_call(ast_t *exp, environment **env) {
 ast_t *eval_while(ast_t *exp, environment *env) {
     ast_t *res = NULL;
     if (exp->type != WHILEAST) {
-        ERRORF(exp->line, eval whileast error);
+        ERRORF(current_file, exp->line, "eval while ast error");
     }
     while_ast_t *wh = (while_ast_t*)exp;
 
     while(1) {
         ast_t *bool = eval(wh->condition, &env);
         if (!IS(bool, BOOLEANAST)) {
-            ERRORF(exp->line, the condition should be boolean);
+            ERRORF(current_file, exp->line, "a boolean is required in condition");
         }
         boolean_ast_t *b = (boolean_ast_t *)bool;
         if (b->value == 0) {
@@ -180,7 +181,7 @@ ast_t *eval_if(ast_t *exp, environment *env) {
     if_ast_t *ifast = (if_ast_t*) exp;
     ast_t *cond = eval(ifast->condition, &env);
     if (!IS(cond, BOOLEANAST)) {
-        ERRORF(cond->line, a boolean is required in condition);
+        ERRORF(current_file, cond->line, "a boolean is required in condition");
     }
     if (((boolean_ast_t*)cond)->value == 1) {
         res = eval_expressions(ifast->then, env);
@@ -216,9 +217,9 @@ ast_t *eval(ast_t *exp, environment **env) {
         case BINARYAST:
             return eval_binary(exp, *env);
         default:
-            ERRORF(exp->line, invalid usage);
+            ERRORF(current_file, exp->line, "unable to eval ast %d", exp->type);
     }
-    
+    return NULL;
 }
 
 ast_t *eval_expressions(expressions* exp, environment *env) {

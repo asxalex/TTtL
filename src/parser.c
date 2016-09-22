@@ -72,21 +72,21 @@ ast_t *parse_while() {
     get_next_token(); // skip while
     lex *current = curtok;
     if (current->token != LPARAN) {
-        ERRORF(current->line, expected LEFT PARENTHSIS)
+        ERRORF(current_file, current->line, "expected LEFT PARENTHSIS (, got %s", current->value);
     }
     ast_t *cond = parse_primary();
     new_while_ast(res, cond, current->line);
 
     current = curtok;
     if(current->token != LBRACE) {
-        ERRORF(current->line, expected LEFT BRACE)
+        ERRORF(current_file, current->line, "expected LEFT BRACE {, got %s", current->value);
     }
     get_next_token(); // skip {
     res->body = gather_expression();
     
     current = curtok;
     if(current->token != RBRACE) {
-        ERRORF(current->line, expected RIGHT BRACE)
+        ERRORF(current_file, current->line, "expected RIGHT BRACE }, got %s", current->value);
     }
     get_next_token(); // skip }
     return (ast_t*)res;
@@ -97,7 +97,7 @@ ast_t *parse_if() {
     get_next_token(); // skip if
     lex *current = curtok;
     if (current->token != LPARAN) {
-        ERRORF(current->line, expected LEFT PARENTHSIS)
+        ERRORF(current_file, current->line, "expected LEFT PARENTHSIS (, got %s", current->value);
     }
 
     ast_t *cond = parse_primary();
@@ -105,7 +105,7 @@ ast_t *parse_if() {
 
     current = curtok;
     if (current->token != LBRACE) {
-        ERRORF(current->line, expected LEFT BRACE)
+        ERRORF(current_file, current->line, "expected LEFT BRACE, {, got %s", current->value);
     }
     get_next_token(); // skip {
     res->then = gather_expression();
@@ -116,7 +116,7 @@ ast_t *parse_if() {
         get_next_token(); // skip else
         current = curtok;
         if (!current || current->token != LBRACE) {
-            ERRORF(current->line, expected LEFT BRACE)
+            ERRORF(current_file, current->line, "expected LEFT BRACE {, got %s", current->value);
         }
         get_next_token(); // skip {
         res->els = gather_expression();
@@ -177,7 +177,7 @@ ast_t *parse_paran() {
     get_next_token(); // consume (
     ast_t *inside = parse_expression();
     if (curtok->token != RPARAN) {
-        ERRORF(curtok->line, expected right parenthesis here);
+        ERRORF(current_file, curtok->line, "expected right parenthesis ), got %s", curtok->value);
     }
     //get_next_token(); // consume )
     return inside;
@@ -201,10 +201,10 @@ expressions* gather_function_params() {
         old = e;
         current = curtok;
         if (!current) {
-            ERRORF(-1, unexpected NIL);
+            ERRORF(current_file, -1, "unexpected NIL");
         }
         if (current->token != RPARAN && current->token != COMMA) {
-            ERRORF(current->line, COMMA or RIGHT PARAN is expected);
+            ERRORF(current_file, current->line, "COMMA or RIGHT PARAN is expected, got %s", current->value);
         }
         if (current->token == COMMA) {
             get_next_token();
@@ -221,7 +221,7 @@ ast_t *parse_character() {
     free(curtok->value);
     get_next_token();
     if(curtok->token != SINGLEQUOTE) {
-        ERRORF(curtok->line, require single quote here);
+        ERRORF(current_file, curtok->line, "require single quote ', got %s", curtok->value);
     }
     get_next_token(); // skip DOUBLEQUOTE
     return (ast_t*)s;
@@ -233,7 +233,7 @@ ast_t *parse_string() {
     curtok->value = NULL;
     get_next_token();
     if(curtok->token != DOUBLEQUOTE) {
-        ERRORF(curtok->line, require double quote here);
+        ERRORF(current_file, curtok->line, "require double quote \" got %s", curtok->value);
     }
     get_next_token(); // skip DOUBLEQUOTE
     return (ast_t*)s;
@@ -248,7 +248,7 @@ ast_t *parse_function() {
     get_next_token(); // skip name
     current = curtok;
     if (current->token != LPARAN) {
-        ERRORF(curtok->line, expected left parenthesis here);
+        ERRORF(current_file, curtok->line, "expected left parenthesis (, got %s", current->value);
     }
     get_next_token(); // skip (
 
@@ -256,7 +256,7 @@ ast_t *parse_function() {
 
     current = curtok;
     if(current->token != LBRACE) {
-        ERRORF(current->line, expected left brace);
+        ERRORF(current_file, current->line, "expected left brace {, got %s", current->value);
     }
     get_next_token(); // skip {
     function->body = gather_expression();
@@ -272,48 +272,58 @@ ast_t *parse_primary() {
     ast_t *res;
     switch(curtok->token) {
         case DEFINE:
+            LOG("%s\n", "parsing define...");
             res = parse_function();
             return res;
         case IDENTIFIER:
+            LOG("%s\n", "parsing identifier...");
             res = parse_identifier();
             //get_next_token(); // skip identifier;
             return res;
         case NUMBER:
+            LOG("%s\n", "parsing number...");
             res = parse_number();
             get_next_token(); // skip number;
             return res;
         case LPARAN:
+            LOG("%s\n", "parsing (");
             res = parse_paran();
             get_next_token(); // skip right paran )
             return res;
         case IF:
+            LOG("%s\n", "parsing if");
             res = parse_if();
             //get_next_token(); the } token is handled already
             return res;
         case WHILE:
+            LOG("%s\n", "parsing while");
             res = parse_while();
             //get_next_token(); // skip right bracket }
             return res;
         case TRUE:
         case FALSE:
+            LOG("%s\n", "parsing boolean");
             res = parse_boolean();
             get_next_token();
             return res;
         case SEMICOLON:
+            LOG("%s\n", "parsing ;");
             get_next_token(); // skip SEMICOLON
             return parse_primary();
         case DOUBLEQUOTE:
+            LOG("%s\n", "parsing \"");
             get_next_token(); // skip double quote
             res = parse_string();
             return res;
         case SINGLEQUOTE:
+            LOG("%s\n", "parsing '");
             get_next_token(); // skip single quote
             res = parse_character();
             return res;
         default:
-            printf("token is %d\n", curtok->token);
-            ERRORF(curtok->line, unexpected token);
+            ERRORF(current_file, curtok->line, "unexpected token (%d)", curtok->token);
     }
+    return NULL;
 }
 
 ast_t *parse_binary_ops(int precedence, ast_t *lhs) {
@@ -339,7 +349,7 @@ ast_t *parse_binary_ops(int precedence, ast_t *lhs) {
             rhs = parse_binary_ops(cur_prec+1, rhs);
             if (!rhs) {
                 // should parse error 2;
-                ERRORF(-1, parse error 2);
+                ERRORF(current_file, -1, "parse error 2");
                 return lhs;
             }
         }
@@ -451,8 +461,7 @@ void print_ast(ast_t *t, int depth) {
             print_expression(((call_ast_t*)t)->args, depth+1);
             break;
         default:
-            printf("ast type is %d\n", t->type);
-            ERRORF(t->line, no such ast type);
+            ERRORF(current_file, t->line, "no such ast type (%d)", t->type);
     }
 }
 

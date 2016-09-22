@@ -56,7 +56,7 @@ void scan_word(FILE *input, int c, int indicator) {
             lex_list[lex_index].value[i++] = c;
         }
         if (isalpha(c)) {
-            ERRORF(line, identifier should not starts with digit);
+            ERRORF(current_file, line, "identifier should not starts with digit");
         }
         ungetc(c, input);
         lex_list[lex_index].token = NUMBER;
@@ -77,7 +77,7 @@ void scan_word(FILE *input, int c, int indicator) {
                 lex_list[lex_index].value[i++] = c;
             }
             if (c == EOF) {
-                ERRORF(line, unmatched double quote);
+                ERRORF(current_file, line, "unmatched double quote");
             }
         } else if (indicator == 0) {
             while(isalnum(c = getc(input)) || (c == '_')) {
@@ -85,11 +85,12 @@ void scan_word(FILE *input, int c, int indicator) {
             }
         } else if (indicator == 2) {
             if ((c = getc(input)) != '\'') {
-                ERRORF(line, unmatched single quote);
+                ERRORF(current_file, line, "unmatched single quote");
             }
         }
         ungetc(c, input);
 
+        lex_list[lex_index].value[i] = '\0';
         char *value = lex_list[lex_index].value;
         if(strcmp(value, "if") == 0) {
             lex_list[lex_index].token = IF;
@@ -109,6 +110,7 @@ void scan_word(FILE *input, int c, int indicator) {
     }
     lex_list[lex_index].value[i] = '\0';
     lex_list[lex_index++].line = line;
+    LOG("%s scanned; token = %d\n", lex_list[lex_index-1].value, lex_list[lex_index-1].token);
 }
 
 void lexer(FILE *input) {
@@ -215,7 +217,7 @@ void lexer(FILE *input) {
                 consume_char(input);
                 ASSIGN_LEX_LIST("||", OR, line);
             } else {
-                ERRORF(line, OR needs two slash)
+                ERRORF(current_file, line, "OR needs two slash (||)");
             }
             continue;
         }
@@ -225,7 +227,7 @@ void lexer(FILE *input) {
                 consume_char(input);
                 ASSIGN_LEX_LIST("&&", AND, line);
             } else {
-                ERRORF(line, AND needs two and)
+                ERRORF(current_file, line, "AND needs two and (&&)");
             }
             continue;
         }
@@ -289,7 +291,7 @@ void lexer(FILE *input) {
         if (isspace(c)) {
             continue;
         }
-        ERRORF(123, unknown character);
+        ERRORF(current_file, -1, "unknown character %c", c);
     }
 }
 

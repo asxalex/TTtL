@@ -29,11 +29,11 @@ ast_t *internal_printf(ast_t *exp, environment *env) {
     expression *node;
     iter = args->first;
     if (!iter) {
-        ERRORF(exp->line, no argument is passed to printf);
+        ERRORF(current_file, exp->line, "no argument is passed to printf");
     }
     node = hlist_entry(iter, expression, node);
     if (node->ast->type != STRINGAST) {
-        ERRORF(node->ast->line, the FMT must be a string);
+        ERRORF(current_file, node->ast->line, "the FMT must be a string");
     }
 
     char *fmt = ((string_ast_t*)node->ast)->value;
@@ -43,14 +43,14 @@ ast_t *internal_printf(ast_t *exp, environment *env) {
         if (*fmt == '%') {
             iter = iter->next;
             if (!iter) {
-                ERRORF(line, not enough argument);
+                ERRORF(current_file, line, "not enough argument");
             }
             node = hlist_entry(iter, expression, node);
             switch (*(++fmt)) {
                 case 'c':
                     tmp = check_format(node, CHARACTERAST, env);
                     if (!tmp) {
-                        ERRORF(line, invalid percent c format);
+                        ERRORF(current_file, line, "invalid percent c format");
                     } else {
                         printf("%c", ((character_ast_t*)tmp)->value);
                     }
@@ -58,7 +58,7 @@ ast_t *internal_printf(ast_t *exp, environment *env) {
                 case 's':
                     tmp = check_format(node, STRINGAST, env);
                     if (!tmp) {
-                        ERRORF(line, invalid percent s format);
+                        ERRORF(current_file, line, "invalid percent s format");
                     } else {
                         printf("%s", ((string_ast_t*)tmp)->value);
                     }
@@ -66,13 +66,13 @@ ast_t *internal_printf(ast_t *exp, environment *env) {
                 case 'd':
                     tmp = check_format(node, NUMBERAST, env);
                     if (!tmp) {
-                        ERRORF(line, invalid percent d format);
+                        ERRORF(current_file, line, "invalid percent d format");
                     } else {
                         printf("%ld", ((number_ast_t*)tmp)->value);
                     }
                     break;
                 default:
-                    ERRORF(line, unknown format);
+                    ERRORF(current_file, line, "unknown format");
             }
             ++fmt;
         } else {
@@ -88,19 +88,24 @@ ast_t *internal_require(ast_t *exp, environment **env) {
     expressions *e = call->args;
     hlist_node_t *iter = e->first;
     if (!iter) {
-        ERRORF(call->line, REQUIRE needs an argument);
+        ERRORF(current_file, call->line, "REQUIRE needs an argument");
     }
     if (iter->next) {
-        ERRORF(call->line, too many arguments are passed to REQUIRE);
+        ERRORF(current_file, call->line, "too many arguments are passed to REQUIRE");
     }
     expression *ee = hlist_entry(iter, expression, node);
     if (ee->ast->type != STRINGAST) {
-        ERRORF(call->line, REQUIRE needs a string argument);
+        ERRORF(current_file, call->line, "REQUIRE needs a string argument, got %d", ee->ast->type);
     }
 
     lex_index = 0; 
     environment *new = extend_environment(*env);
-    FILE *fp = fopen(((string_ast_t*)ee->ast)->value, "r");
+    char *filename = ((string_ast_t*)ee->ast)->value;
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        ERRORF(current_file, exp->line, "failed to open required file %s", filename);
+    }
+    current_file = filename;
     lexer(fp);
     fclose(fp);
     expressions *exps = parser();

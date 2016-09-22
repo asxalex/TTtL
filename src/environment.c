@@ -54,7 +54,7 @@ void print_env(environment *e) {
 
 void define_variable(ast_t* var, ast_t *val, environment *env) {
     if (var->type != VARIABLEAST){
-        ERRORF(-1, variable is required);
+        ERRORF(current_file, -1, "variable is required, got %d", var->type);
     }
     env_node *node = (env_node*)malloc(sizeof(env_node));
     INIT_HLIST_NODE(&node->node);

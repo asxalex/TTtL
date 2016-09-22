@@ -7,12 +7,17 @@
 
 #include "tt.h"
 
+char *current_file = "";
 void interactive_mode() {
     // TODO
 }
 
 void file_mode(const char *filename) {
+    current_file = (char*)filename;
     FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        ERRORF(current_file,-1, "no such file %s", filename);
+    }
     lexer(fp);
     //print_lexer_result();
     //printf("=================================\n");
