@@ -2,6 +2,14 @@ TTtL
 ==
 TTtL stands for "TT the Language", which is an implementation of my own language, just for fun.
 
+### how to use
+```c
+cd src && make
+```
+
+### example
+
+Fibonacci:
 ```c
 define fib(n) {
     if (n == 0 || n == 1) {
