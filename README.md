@@ -1,6 +1,6 @@
-TT
+TTtL
 ==
-an implementation of my own language
+TTtL stands for "TT the Language", which is an implementation of my own language, just for fun.
 
 ```c
 define fib(n) {
