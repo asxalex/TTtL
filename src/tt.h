@@ -305,7 +305,7 @@ void add_after_expression(expression *, expression *);
 
 // for eval
 ast_t *eval(ast_t *, environment **);
-ast_t *eval_expressions(expressions *, environment *);
+ast_t *eval_expressions(expressions *, environment **);
 int is_variable(ast_t *);
 
 // for binary_eval

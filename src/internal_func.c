@@ -105,12 +105,14 @@ ast_t *internal_require(ast_t *exp, environment **env) {
     if (!fp) {
         ERRORF(current_file, exp->line, "failed to open required file %s", filename);
     }
+    char *temp = current_file;
     current_file = filename;
     lexer(fp);
     fclose(fp);
     expressions *exps = parser();
     *env = new;
-    eval_expressions(exps, *env);
+    eval_expressions(exps, env);
+    current_file = temp;
     return NULL;
 };
 

@@ -150,7 +150,7 @@ ast_t *eval_function_call(ast_t *exp, environment **env) {
     if (call_arg_list != NULL || func_arg_list != NULL) {
         ERRORF(current_file, exp->line, "mismatch number of arguments");
     }
-    ast_t *res = eval_expressions(function->body, new_frame);
+    ast_t *res = eval_expressions(function->body, &new_frame);
     //print_ast(res, 0);
     return res;
 }
@@ -171,7 +171,7 @@ ast_t *eval_while(ast_t *exp, environment *env) {
         if (b->value == 0) {
             break;
         }
-        res = eval_expressions(wh->body, env);
+        res = eval_expressions(wh->body, &env);
     }
     return res;
 }
@@ -184,10 +184,10 @@ ast_t *eval_if(ast_t *exp, environment *env) {
         ERRORF(current_file, cond->line, "a boolean is required in condition");
     }
     if (((boolean_ast_t*)cond)->value == 1) {
-        res = eval_expressions(ifast->then, env);
+        res = eval_expressions(ifast->then, &env);
     } else {
         if (ifast->els) {
-            res = eval_expressions(ifast->els, env);
+            res = eval_expressions(ifast->els, &env);
         }
     }
     return res;
@@ -222,7 +222,7 @@ ast_t *eval(ast_t *exp, environment **env) {
     return NULL;
 }
 
-ast_t *eval_expressions(expressions* exp, environment *env) {
+ast_t *eval_expressions(expressions* exp, environment **env) {
     ast_t *res = NULL;
     hlist_node_t *iter;
     expression *e;
@@ -232,7 +232,7 @@ ast_t *eval_expressions(expressions* exp, environment *env) {
         if (!e->ast) {
             continue;
         }
-        res = eval(e->ast, &env);
+        res = eval(e->ast, env);
     }
     //return NULL;
     return res;

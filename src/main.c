@@ -24,7 +24,7 @@ void file_mode(const char *filename) {
     fclose(fp);
     expressions *exps = parser();
     environment *env = init_env();
-    eval_expressions(exps, env);
+    eval_expressions(exps, &env);
     //print_env(env);
 }
 
