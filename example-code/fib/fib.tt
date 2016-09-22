@@ -1,0 +1,7 @@
+require("include.tt")
+
+i = 0
+while(i <= 10) {
+    printf("%d\n", fib(i))
+    i = i + 1
+}
