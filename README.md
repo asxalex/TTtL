@@ -26,7 +26,7 @@ while(i <= 10) {
 }
 ```
 
-now TT supports require
+now TT supports "require"
 
 ```c
 // in helper.tt
@@ -34,7 +34,7 @@ define add_3(a) {
     a+3
 }
 
-// in main.c
+// in main.tt
 require("helper.tt")
 
 printf("%d\n", add_3(20))
