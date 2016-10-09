@@ -41,4 +41,4 @@ printf("%d\n", add_3(20))
 ```
 
 ##TODO
-supports for list
+supports for list, the environment can also be replaced by hash table for performance.
