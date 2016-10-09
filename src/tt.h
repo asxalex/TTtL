@@ -261,7 +261,10 @@ typedef struct _if_ast {
     exit(-1);
 
 static inline void ERRORF(const char *filename, int row, const char *strfmt, ...) {
-    fprintf(stderr, "in file %s, line %d Error : ", filename, row);
+    if (filename) {
+        fprintf(stderr, "in file %s, ", filename);
+    }
+    fprintf(stderr, "in line %d Error : ", row);
     va_list ap;
     va_start(ap, strfmt);
     vfprintf(stderr, strfmt, ap);
